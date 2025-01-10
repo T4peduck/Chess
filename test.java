@@ -1,4 +1,7 @@
 
+import java.nio.charset.StandardCharsets;
+
+
 public class test {
     public static void main(String[] args) {
         ChessBoard b = new ChessBoard();
@@ -14,6 +17,9 @@ public class test {
 
         b.printMoveList(false);
         b.printMoveList(true);
+
+        byte[] c = new byte[] { (byte) 0xd8, (byte) 0xA1};
+        System.out.print(new String(c, StandardCharsets.UTF_8));
     }
 
 

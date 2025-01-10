@@ -106,7 +106,8 @@ public class ChessBoard {
      * Purpose: moves a peice from one location to another, replacing
      *          other peice if its currently occupying the tile. Does so
      *          by checking if peice is at initial location then by checking
-     *          if destination tile is a possible move.
+     *          if destination tile is a possible move. returns false, if
+     *          unable to carry out move.
      */
     public boolean makeMove(int rankInit, int colInit, Integer[] move) {
         Piece p = gameboard[rankInit][colInit];
@@ -126,6 +127,11 @@ public class ChessBoard {
             System.out.println("Move destination invalid");
             return false;
         }
+        //TODO: THIS ONE FUCIKING BASTARD
+        if(p.getClass() == Pawn.class) {
+
+        }
+
         p.setPiecePos(move[0], move[1]);
         gameboard[move[0]][move[1]] = p;
         gameboard[rankInit][colInit] = null;
@@ -168,17 +174,29 @@ public class ChessBoard {
      */
     public String toString() {
         String rstr = "";
-        int i = 1;
+        if(playerMove) {
+            rstr += "WHITE MOVE\n";
+        } else {
+            rstr += "BLACK MOVE\n";
+        }
+
+        int i = 0;
         for(Piece[] row: gameboard) {
-            rstr += i;
+            int j = 0;
+            rstr += (i + 1);
             for(Piece p: row) {
                 rstr += " ";
                 if(p == null) {
-                    rstr += " ";
+                    if((i + j) % 2 == 0) {
+                        rstr += "\u25A9";
+                    } else {
+                        rstr += "\u25A2";
+                    }
                 } else {
                     rstr += p.toString();
                 }
                 rstr += " ";
+                j++;
             }
             rstr += "\n";
             i++;

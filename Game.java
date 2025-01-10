@@ -7,30 +7,37 @@
  * Keeps track of who's turn it is
  * 
  * Takes in input from the User
+ * 
+ * TODO: reorganize stuff so its more easily readable / add some additional comments
+ * TODO: chessboard.java, such as array list that keeps track of taken peices and array list that holds pawn information
+ * TODO: chessboard.java, such as checks in move to see what peice was just moved, for pawns 2-jump / pawns promotion / rook and king castleing
+ * TODO: chessboard.java, add in way to check for check
+ * TODO: chessboard.java, add in way to hold last addition move, specifically for ducking en passant
  */
 
 import java.util.Scanner;
 
 public class Game {
-    private static ChessBoard b;
+    private static  ChessBoard  b;
+    private static  ChessBoard  setBoard;
 
-    private static  ChessBoard setBoard;
+    private static  Scanner     read;
+
     public static void main(String[] args) {
-        Scanner read = new Scanner(System.in);
-        boolean isPlaying;
-        String instr;
+        read = new Scanner(System.in);
+
         System.out.println("Would you like to play chess? ('y' if yes)");
-        instr = read.nextLine();
-        isPlaying = instr.equals("y");
+        boolean isPlaying = read.nextLine().equals("y");
 
+        //creates board
         setBoard = resetBoard();
-
 
         System.out.println("Plz enter move in form of '[piece][file][rank] [file][rank]' , for example 'pe2 e4' for pawn to e4");
 
         while(isPlaying) {
             b = setBoard;
             System.out.println(b);
+            //plays the game
             playGame(b, read);
 
             System.out.println("Play again? ('y' if yes)");
@@ -38,6 +45,9 @@ public class Game {
         }
     }
 
+    /*
+     * purpose: returns a complete board. Here inorder to save space in main
+     */
     public static ChessBoard resetBoard() {
         //white peices
         ChessBoard temp = new ChessBoard();
@@ -75,6 +85,12 @@ public class Game {
         return temp;
     }
     
+    /*
+     * purpose: takes in the entered move and performs the move on the board. Checks 
+     *          if move is in the right format and if move can even go through. If move
+     *          isn't able to go through, returns false, signifying the move attempt has'
+     *          has failed,
+     */
     public static boolean movePiece(ChessBoard b, String move) {
         int ogRank;
         int ogFile;
@@ -100,6 +116,13 @@ public class Game {
         return b.makeMove(ogRank, ogFile, moveArr);
     }
 
+    /*
+     * purpose: actually plays the game of chess. While neither King is in checkmate or stalemate,
+     *          plays the game. Takes in the players next move, checks if its legal, and performs
+     *          it if its legal.
+     *  
+     * TODO: may need to return something, like 0 if black wins, 1 if white wins, and 2 if stalemate
+     */
     public static void playGame(ChessBoard b, Scanner read) {
         while(!(b.isBCheckMate() || b.isWCheckMate())) {
             boolean legalMove = false;
@@ -110,6 +133,7 @@ public class Game {
 
                 System.out.println(b);
             }
+            b.switchTurn();
         }
     }
 

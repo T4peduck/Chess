@@ -12,6 +12,7 @@
  *                      List of possible  moves a peice can make
  * 
  *      TODO: finish each type of piece movement
+ *      TODO: Add in peice signifyers;
  */
 
 
@@ -76,7 +77,11 @@ class Pawn extends Piece {
     }
 
     public String toString() {
-        return "^";
+        if(team) {
+            return "\u2659";
+        } else {
+            return "\u265F";
+        }
     }
 
     public void updateMoveList() {
@@ -88,7 +93,7 @@ class Pawn extends Piece {
     }
 
     //TODO: has move should be set to true, only when the peice has moved
-    private void updateMoveListB() {
+    private void updateMoveListW() {
         int r;
         int c;
         ArrayList<Integer[]> temp = new ArrayList<>();
@@ -135,7 +140,7 @@ class Pawn extends Piece {
         moves = temp;
     }
 
-    private void updateMoveListW() {
+    private void updateMoveListB() {
         int r;
         int c;
         ArrayList<Integer[]> temp = new ArrayList<>();
@@ -193,7 +198,11 @@ class Knight extends Piece {
     }
 
     public String toString() {
-        return "N";
+        if(team) {
+            return "\u2658";
+        } else {
+            return "\u265E";
+        }
     }
 
     public void updateMoveList() {
@@ -293,7 +302,11 @@ class Bishop extends Piece {
     }
 
     public String toString() {
-        return "B";
+        if(team) {
+            return "\u2657";
+        } else {
+            return "\u265D";
+        }
     }
 
     public void updateMoveList() {
@@ -384,7 +397,11 @@ class Rook extends Piece {
     }
 
     public String toString() {
-        return "R";
+        if(team) {
+            return "\u2656";
+        } else {
+            return "\u265C";
+        }
     }
 
     public void updateMoveList() {
@@ -458,7 +475,11 @@ class Queen extends Piece {
     }
 
     public String toString() {
-        return "Q";
+        if(team) {
+            return "\u2655";
+        } else {
+            return "\u265B";
+        }
     }
 
     public void updateMoveList() {
@@ -634,7 +655,11 @@ class King extends Piece {
     }
 
     public String toString() {
-        return "K";
+        if(team) {
+            return "\u2654";
+        } else {
+            return "\u265A";
+        }
     }
 
     public void updateMoveList() {
