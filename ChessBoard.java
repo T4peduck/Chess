@@ -33,11 +33,13 @@ public class ChessBoard {
     private Piece[][] gameboard;
     private boolean playerMove;
 
-    private ArrayList<Piece> whitePeices;
+    private ArrayList<Piece> whitePieces;
     public ArrayList<Integer[]> whiteMoves;
+    private King whiteKing;
 
-    private ArrayList<Piece> blackPeices;
+    private ArrayList<Piece> blackPieces;
     public ArrayList<Integer[]> blackMoves;
+    private King blackKing;
 
     /*
      * CONSTRUCTOR
@@ -46,11 +48,14 @@ public class ChessBoard {
         //make the board
         gameboard = new Piece[8][8];
         playerMove = true;
+
+        whitePieces = new ArrayList<Piece>();
+        whiteMoves = new ArrayList<Integer[]>();
+
+        blackPieces = new ArrayList<Piece>();
+        blackMoves = new ArrayList<Integer[]>();
+
     }
-
-
-
-
 
 
     //Getters
@@ -68,14 +73,33 @@ public class ChessBoard {
         gameboard[rank][col] = p;
 
         if(p.getTeam() == true) {
-            whitePeices.add(p);
+            whitePieces.add(p);
         } else {
-            blackPeices.add(p);
+            blackPieces.add(p);
         }
     }
 
+    public void setKing(King k) {
+        if(k.team && whiteKing == null) {
+            whiteKing = k;
+        } else if (!k.team && blackKing == null) {
+            blackKing = k;
+        } else {
+            System.out.println("King was already set");
+        }
+    }
 
+    public void switchTurn() {
+        playerMove = !playerMove;
+    }
 
+    public boolean isWCheckMate() {
+        return whiteKing.isCheckMate();
+    }
+
+    public boolean isBCheckMate() {
+        return blackKing.isCheckMate();
+    }
 
 
     /*
@@ -127,13 +151,13 @@ public class ChessBoard {
     }
 
     @SuppressWarnings("unchecked")
-    private void updateMoveList() {
-        for(Piece p: whitePeices) {
+    public void updateMoveList() {
+        for(Piece p: whitePieces) {
             p.updateMoveList();
             whiteMoves.addAll(p.getMoves());
         }
 
-        for(Piece p: blackPeices) {
+        for(Piece p: blackPieces) {
             p.updateMoveList();
             blackMoves.addAll(p.getMoves());
         }
@@ -144,7 +168,7 @@ public class ChessBoard {
      */
     public String toString() {
         String rstr = "";
-        int i = 0;
+        int i = 1;
         for(Piece[] row: gameboard) {
             rstr += i;
             for(Piece p: row) {
@@ -159,7 +183,23 @@ public class ChessBoard {
             rstr += "\n";
             i++;
         }
-        return rstr + " 0  1  2  3  4  5  6  7  ";
+        return rstr + "  a  b  c  d  e  f  g  h  ";
+    }
+
+    public void printMoveList(boolean team) {
+        if(team) {
+            System.out.println("WhitePieces:");
+            for(Piece p: whitePieces) {
+                System.out.print(p + ": ");
+                p.printMoves();
+            }
+        } else {
+            System.out.println("BlackPieces:");
+            for(Piece p: blackPieces) {
+                System.out.print(p + ": ");
+                p.printMoves();
+            }
+        }
     }
 
 }

@@ -32,6 +32,8 @@ public class Piece {
         this.board = board;
         this.rank = rank;
         this.col = col;
+
+        moves = new ArrayList<>();
     }
 
     public void setPiecePos(int newrank, int newcol) {
@@ -48,6 +50,13 @@ public class Piece {
     }
 
     public void updateMoveList() {}
+
+    public void printMoves() {
+        for(Integer[] m: moves) {
+            System.out.print(Arrays.toString(m));
+        }
+        System.out.println();
+    }
 
 
 }
@@ -70,27 +79,36 @@ class Pawn extends Piece {
         return "^";
     }
 
-    public void updateMoveListB() {
+    public void updateMoveList() {
+        if(team) {
+            updateMoveListW();
+        } else {
+            updateMoveListB();
+        }
+    }
+
+    //TODO: has move should be set to true, only when the peice has moved
+    private void updateMoveListB() {
         int r;
         int c;
         ArrayList<Integer[]> temp = new ArrayList<>();
-        if(col == 7) {
+        if(rank == 7) {
             promote = true;
         }
 
         //move 1
-        c = col + 1;
-        if(c < 8 && board.getPiece(rank, c) == null) {
+        r = rank + 1;
+        if(r < 8 && board.getPiece(r, col) == null) {
             hasMoved = true;
-            Integer[] move = {rank, c};
+            Integer[] move = {r, col};
             temp.add(move);
         }
 
         //move 2
-        c = col + 2;
-        if(c < 8 && board.getPiece(rank, c) == null && hasMoved == false){
+        r = rank + 2;
+        if(r < 8 && board.getPiece(r, col) == null && hasMoved == false){
             hasMoved = true;
-            Integer[] move = {rank, c};
+            Integer[] move = {r, col};
             temp.add(move);
         }
 
@@ -105,9 +123,9 @@ class Pawn extends Piece {
         }
 
         //takeL
-        c = col + 1;
-        r = rank - 1;
-        if(c < 8 && r > -1 &&
+        c = col - 1;
+        r = rank + 1;
+        if(c > -1 && r < 8 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
             hasMoved = true;
             Integer[] move = {r,c};
@@ -117,7 +135,7 @@ class Pawn extends Piece {
         moves = temp;
     }
 
-    public void updateMoveListW() {
+    private void updateMoveListW() {
         int r;
         int c;
         ArrayList<Integer[]> temp = new ArrayList<>();
@@ -126,25 +144,25 @@ class Pawn extends Piece {
         }
 
         //move 1
-        c = col - 1;
-        if(c > -1 && board.getPiece(rank, c) == null) {
+        r = rank - 1;
+        if(r > -1 && board.getPiece(r, col) == null) {
             hasMoved = true;
-            Integer[] move = {rank, c};
+            Integer[] move = {r, col};
             temp.add(move);
         }
 
         //move 2
-        c = col - 2;
-        if(c > -1 && board.getPiece(rank, c) == null && hasMoved == false){
+        r = rank - 2;
+        if(r > -1 && board.getPiece(r, col) == null && hasMoved == false){
             hasMoved = true;
-            Integer[] move = {rank, c};
+            Integer[] move = {r, col};
             temp.add(move);
         }
 
         //takeR
-        c = col - 1;
-        r = rank + 1;
-        if(c > -1 && r < 8 &&
+        c = col + 1;
+        r = rank - 1;
+        if(c < 8 && r > -1 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
             hasMoved = true;
             Integer[] move = {r,c};
@@ -585,12 +603,12 @@ class Queen extends Piece {
 
 class King extends Piece {
 
-public King(boolean team, ChessBoard board, int rank, int col) {
+    public King(boolean team, ChessBoard board, int rank, int col) {
     super(team, board, rank, col);
-}
+    }
 
-public boolean isCheck() {
-    Integer[] currentPosition = {rank, col};
+    public boolean isCheck(int  r, int c) {
+    Integer[] currentPosition = {r, c};
     if(team) {
         for(Integer[] m: board.blackMoves) {
             if(Arrays.equals(currentPosition, m)) {
@@ -604,24 +622,88 @@ public boolean isCheck() {
             }
         }
     }
-    return false;
-}
-
-public boolean isCheckMate() {
-    if(moves.size() == 0 && isCheck()) {
-        return true;
+        return false;
     }
-    return false;
-}
 
-public boolean isStaleMate() {
-    if(moves.size() == 0 && !isCheck()) {
-        return true;
+    public boolean isCheckMate() {
+        return moves.isEmpty() && isCheck(rank, col);
     }
-    return false;
-}
 
-public String toString() {
-    return "K";
-}
+    public boolean isStaleMate() {
+        return moves.isEmpty() && !isCheck(rank, col);
+    }
+
+    public String toString() {
+        return "K";
+    }
+
+    public void updateMoveList() {
+        int r;
+        int c;
+        ArrayList<Integer[]> temp = new ArrayList<>();
+
+        //N
+        r = rank - 1;
+        if(r > -1 && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null)  && !isCheck(r, col)) {
+            Integer[] m = {r, col};
+            temp.add(m);
+        }
+
+        //NE
+        r = rank - 1;
+        c = col + 1;
+        if(r > -1 && (board.getPiece(r, c) != null && col < 8 && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+            Integer[] m = {r, c};
+            temp.add(m);
+        }
+
+        //E
+        c = col + 1;
+        if(c < 8 && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) && !isCheck(rank, c)) {
+            Integer[] m = {rank, c};
+            temp.add(m);
+        }
+
+        //SE
+        r = rank + 1;
+        c = col + 1;
+        if(r < 8 && c < 8 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+            Integer[] m = {r, c};
+            temp.add(m);
+        }
+
+        //S
+        r = rank + 1;
+        if(r < 8 && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null) && !isCheck(r, col)) {
+            Integer[] m = {r, col};
+            temp.add(m);
+        }
+
+        //SW
+        r = rank + 1;
+        c = col - 1;
+        if(r < 8 && c > -1 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+            Integer[] m = {r, c};
+            temp.add(m);
+        }
+
+        //W
+        c = col - 1;
+        if(c > -1 && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) && !isCheck(rank, c)) {
+            Integer[] m = {r, c};
+            temp.add(m);
+        }
+
+
+        //NW
+        r = rank - 1;
+        c = col - 1;
+        if(r > -1 && c > -1 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+            Integer[] m = {r, c};
+            temp.add(m);
+        }
+
+        moves = temp;
+
+    }
 }
