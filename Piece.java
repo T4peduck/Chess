@@ -104,7 +104,6 @@ class Pawn extends Piece {
         //move 1
         r = rank + 1;
         if(r < 8 && board.getPiece(r, col) == null) {
-            hasMoved = true;
             Integer[] move = {r, col};
             temp.add(move);
         }
@@ -112,7 +111,6 @@ class Pawn extends Piece {
         //move 2
         r = rank + 2;
         if(r < 8 && board.getPiece(r, col) == null && hasMoved == false){
-            hasMoved = true;
             Integer[] move = {r, col};
             temp.add(move);
         }
@@ -122,7 +120,6 @@ class Pawn extends Piece {
         r = rank + 1;
         if(c < 8 && r < 8 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
-            hasMoved = true;
             Integer[] move = {r,c};
             temp.add(move);
         }
@@ -132,7 +129,6 @@ class Pawn extends Piece {
         r = rank + 1;
         if(c > -1 && r < 8 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
-            hasMoved = true;
             Integer[] move = {r,c};
             temp.add(move);
         }
@@ -151,7 +147,6 @@ class Pawn extends Piece {
         //move 1
         r = rank - 1;
         if(r > -1 && board.getPiece(r, col) == null) {
-            hasMoved = true;
             Integer[] move = {r, col};
             temp.add(move);
         }
@@ -159,7 +154,6 @@ class Pawn extends Piece {
         //move 2
         r = rank - 2;
         if(r > -1 && board.getPiece(r, col) == null && hasMoved == false){
-            hasMoved = true;
             Integer[] move = {r, col};
             temp.add(move);
         }
@@ -169,7 +163,6 @@ class Pawn extends Piece {
         r = rank - 1;
         if(c < 8 && r > -1 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
-            hasMoved = true;
             Integer[] move = {r,c};
             temp.add(move);
         }
@@ -179,12 +172,15 @@ class Pawn extends Piece {
         r = rank - 1;
         if(c > -1 && r > -1 &&
             board.getPiece(r, c) != null && board.getPiece(r,c).team != team) {
-            hasMoved = true;
             Integer[] move = {r,c};
             temp.add(move);
         }
 
         moves = temp;
+    }
+
+    public void pawnHasMoved() {
+        hasMoved = true;
     }
 }
 
@@ -392,6 +388,8 @@ class Bishop extends Piece {
  * -------------------------------------------------------------------
  */
 class Rook extends Piece {
+    boolean hasMoved = false;
+
     public Rook(boolean team, ChessBoard board, int rank, int col) {
         super(team, board, rank, col);
     }
@@ -623,9 +621,17 @@ class Queen extends Piece {
  */
 
 class King extends Piece {
+    protected boolean hasMoved = false;
+    protected boolean isInCheck = false;
+    protected ArrayList<Integer> kingBubble;
 
     public King(boolean team, ChessBoard board, int rank, int col) {
-    super(team, board, rank, col);
+        super(team, board, rank, col);
+        updateKingBubble();
+    }
+
+    public boolean isInCheck() {
+        return isInCheck;
     }
 
     public boolean isCheck(int  r, int c) {
@@ -654,6 +660,10 @@ class King extends Piece {
         return moves.isEmpty() && !isCheck(rank, col);
     }
 
+    public void setCheck(boolean c) {
+        isInCheck = c;
+    }
+
     public String toString() {
         if(team) {
             return "\u2654";
@@ -662,14 +672,35 @@ class King extends Piece {
         }
     }
 
+    public void updateKingBubble() {
+        ArrayList<Integer> temp = new ArrayList<>();
+        for(int i = rank - 1; i < rank + 2; i++) {
+            for(int j = col - 1; j < col + 2; j++) {
+                if(i != rank && j !=col && i > -1 && i < 8 && j > -1 && j < 8) {
+                    temp.add(10*rank + col);
+                }
+            }
+        }
+        kingBubble = temp;
+    }
+
     public void updateMoveList() {
         int r;
         int c;
         ArrayList<Integer[]> temp = new ArrayList<>();
+        King enemyKing;
+
+        if(team) {
+            enemyKing = board.blackKing;
+        } else {
+            enemyKing = board.whiteKing;
+        }
 
         //N
         r = rank - 1;
-        if(r > -1 && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null)  && !isCheck(r, col)) {
+        if(r > -1 
+                && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null)  
+                && !isCheck(r, col) && !enemyKing.kingBubble.contains(r*10+col)) {
             Integer[] m = {r, col};
             temp.add(m);
         }
@@ -677,14 +708,18 @@ class King extends Piece {
         //NE
         r = rank - 1;
         c = col + 1;
-        if(r > -1 && (board.getPiece(r, c) != null && col < 8 && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+        if(r > -1 && col < 8 
+                && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) 
+                && !isCheck(r, c) && !enemyKing.kingBubble.contains(r*10+c)) {
             Integer[] m = {r, c};
             temp.add(m);
         }
 
         //E
         c = col + 1;
-        if(c < 8 && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) && !isCheck(rank, c)) {
+        if(c < 8 
+                && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) 
+                && !isCheck(rank, c) && !enemyKing.kingBubble.contains(rank*10+c)) {
             Integer[] m = {rank, c};
             temp.add(m);
         }
@@ -692,14 +727,18 @@ class King extends Piece {
         //SE
         r = rank + 1;
         c = col + 1;
-        if(r < 8 && c < 8 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+        if(r < 8 && c < 8 
+                && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) 
+                && !isCheck(r, c) && !enemyKing.kingBubble.contains(r*10+c)) {
             Integer[] m = {r, c};
             temp.add(m);
         }
 
         //S
         r = rank + 1;
-        if(r < 8 && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null) && !isCheck(r, col)) {
+        if(r < 8 
+                && (board.getPiece(r, col) != null && board.getPiece(r, col).getTeam() != team || board.getPiece(r, col) == null) 
+                && !isCheck(r, col) && !enemyKing.kingBubble.contains(r*10+col)) {
             Integer[] m = {r, col};
             temp.add(m);
         }
@@ -707,15 +746,19 @@ class King extends Piece {
         //SW
         r = rank + 1;
         c = col - 1;
-        if(r < 8 && c > -1 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+        if(r < 8 && c > -1 
+                && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) 
+                && !isCheck(r, c) && !enemyKing.kingBubble.contains(r*10+c)) {
             Integer[] m = {r, c};
             temp.add(m);
         }
 
         //W
         c = col - 1;
-        if(c > -1 && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) && !isCheck(rank, c)) {
-            Integer[] m = {r, c};
+        if(c > -1 
+                && (board.getPiece(rank, c) != null && board.getPiece(rank, c).getTeam() != team || board.getPiece(rank, c) == null) 
+                && !isCheck(rank, c) && !enemyKing.kingBubble.contains(rank*10+c)) {
+            Integer[] m = {rank, c};
             temp.add(m);
         }
 
@@ -723,7 +766,9 @@ class King extends Piece {
         //NW
         r = rank - 1;
         c = col - 1;
-        if(r > -1 && c > -1 && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) && !isCheck(r, c)) {
+        if(r > -1 && c > -1 
+                && (board.getPiece(r, c) != null && board.getPiece(r, c).getTeam() != team || board.getPiece(r, c) == null) 
+                && !isCheck(r, c) && !enemyKing.kingBubble.contains(r*10+c)) {
             Integer[] m = {r, c};
             temp.add(m);
         }

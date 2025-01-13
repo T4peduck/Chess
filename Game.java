@@ -13,6 +13,7 @@
  * TODO: chessboard.java, such as checks in move to see what peice was just moved, for pawns 2-jump / pawns promotion / rook and king castleing
  * TODO: chessboard.java, add in way to check for check
  * TODO: chessboard.java, add in way to hold last addition move, specifically for ducking en passant
+ * TODO: undoing moves, espesh if a peice was captured in the process
  */
 
 import java.util.Scanner;
@@ -30,13 +31,15 @@ public class Game {
         boolean isPlaying = read.nextLine().equals("y");
 
         //creates board
-        setBoard = resetBoard();
+        setBoard = testBoard();
 
         System.out.println("Plz enter move in form of '[piece][file][rank] [file][rank]' , for example 'pe2 e4' for pawn to e4");
 
         while(isPlaying) {
             b = setBoard;
             System.out.println(b);
+            b.printMoveList(true);
+            b.printMoveList(false);
             //plays the game
             playGame(b, read);
 
@@ -83,6 +86,21 @@ public class Game {
         temp.updateMoveList();
 
         return temp;
+    }
+
+    public static ChessBoard testBoard() {
+        ChessBoard temp = new ChessBoard();
+       temp.setPiece(new King(true, temp, 0, 5), 0, 5);
+       //temp.setPiece(new Knight(true, temp, 7,7), 7, 7);
+       temp.setKing((King) temp.getPiece(0, 5));
+
+       temp.setPiece(new King(false, temp, 2, 5), 2, 5);
+       temp.setKing((King) temp.getPiece(2, 5));
+       //temp.setPiece(new Queen(false, temp, 1, 0), 1, 0);
+
+       temp.updateMoveList();
+
+       return temp;
     }
     
     /*
@@ -135,6 +153,7 @@ public class Game {
             }
             b.switchTurn();
         }
+        System.out.println("game over");
     }
 
 }
